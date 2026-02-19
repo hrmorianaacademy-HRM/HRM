@@ -97,8 +97,16 @@ async function runDatabaseMigrations() {
 
 // Initialize manager user
 async function initializeManagerUser() {
-  const managerEmail = process.env.MANAGER_EMAIL || 'vcodezmanager@gmail.com';
+  const rawEmail = process.env.MANAGER_EMAIL || 'vcodezmanager@gmail.com';
+  const managerEmail = rawEmail.toLowerCase().trim();
   const managerPassword = process.env.MANAGER_PASSWORD || 'VCodezhrm@2025';
+
+  console.log('--------------------------------------------------');
+  console.log('[Init] Initializing Manager User...');
+  console.log(`[Init] Using Email: ${managerEmail}`);
+  console.log(`[Init] Env rawEmail: ${rawEmail}`);
+  console.log(`[Init] Env Password length: ${managerPassword.length}`);
+  console.log('--------------------------------------------------');
 
   if (!managerEmail || !managerPassword) {
     console.error("Manager credentials not found in environment variables");
@@ -110,6 +118,7 @@ async function initializeManagerUser() {
     const existingManager = await storage.getUserByEmail(managerEmail);
 
     if (!existingManager) {
+      console.log(`[Init] Manager not found, creating user...`);
       // Create new manager user
       const hashedPassword = await bcrypt.hash(managerPassword, 10);
       const managerUser = await storage.createUser({
@@ -122,24 +131,26 @@ async function initializeManagerUser() {
         role: "manager",
         isActive: true,
       });
-      console.log(`Manager user created successfully: ${managerUser.email}`);
+      console.log(`[Init] Manager user created successfully: ${managerUser.email}`);
     } else {
+      console.log(`[Init] Manager user already exists: ${existingManager.email}`);
       // Update existing manager user's password if needed
       const isPasswordValid = await bcrypt.compare(managerPassword, existingManager.passwordHash || '');
       if (!isPasswordValid) {
+        console.log(`[Init] Password change detected, updating...`);
         const hashedPassword = await bcrypt.hash(managerPassword, 10);
         await storage.updateUser(existingManager.id, {
           passwordHash: hashedPassword,
           role: "manager",
           isActive: true,
         });
-        console.log(`Manager user password updated: ${existingManager.email}`);
+        console.log(`[Init] Manager user password updated: ${existingManager.email}`);
       } else {
-        console.log(`Manager user already exists: ${existingManager.email}`);
+        console.log(`[Init] Password is already correct.`);
       }
     }
-  } catch (error) {
-    console.error("Error initializing manager user:", error);
+  } catch (error: any) {
+    console.error('[Init] Error initializing manager:', error.message);
   }
 }
 

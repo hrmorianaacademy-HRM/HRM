@@ -1044,42 +1044,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Password-based login route
   app.post('/api/auth/login', async (req, res) => {
     try {
-      const { email, password } = req.body;
+      const { email: rawEmail, password } = req.body;
+      const email = rawEmail?.toLowerCase().trim();
 
       if (!email || !password) {
         return res.status(400).json({ message: "Email and password are required" });
       }
 
-      // Hardcoded manager login
-      if (email === 'vcodezmanager@gmail.com' && password === 'VCodezhrm@2025') {
-        // Fetch the actual manager user from database
-        const managerUser = await storage.getUserByEmail(email);
-
-        if (!managerUser) {
-          return res.status(500).json({ message: "Manager user not found in database" });
-        }
-
-        (req as any).session.user = {
-          id: managerUser.id, // Use real database ID
-          email: email,
-          role: 'manager',
-          loginType: 'password'
-        };
-
-        console.log(`Hardcoded manager login successful for: ${email} (DB ID: ${managerUser.id})`);
-
-        return res.json({
-          success: true,
-          user: {
-            id: managerUser.id, // Use real database ID
-            email: email,
-            firstName: managerUser.firstName || 'VCodez',
-            lastName: managerUser.lastName || 'Manager',
-            role: 'manager',
-            fullName: managerUser.fullName || 'VCodez Manager'
-          }
-        });
-      }
+      // Hardcoded manager login check removed. 
+      // All users (including the manager) are now validated against the database.
 
       // Find user by email
       const user = await storage.getUserByEmail(email);

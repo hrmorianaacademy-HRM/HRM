@@ -1106,16 +1106,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // User management routes (Manager only)
   app.get('/api/users', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
-
-      // Handle hardcoded manager
-      let userRole = 'hr';
-      if (userId === 'hardcoded-manager-id') {
-        userRole = 'manager';
-      } else {
-        const currentUser = await storage.getUser(userId);
-        userRole = currentUser?.role || 'hr';
-      }
+      const userRole = (req as any).user?.role || 'hr';
+      const userId = (req as any).user?.claims?.sub;
 
       const { role } = req.query;
       let users;
@@ -1220,16 +1212,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post('/api/users', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
-
-      // Handle hardcoded manager
-      let userRole = 'hr';
-      if (userId === 'hardcoded-manager-id') {
-        userRole = 'manager';
-      } else {
-        const currentUser = await storage.getUser(userId);
-        userRole = currentUser?.role || 'hr';
-      }
+      const userRole = (req as any).user?.role || 'hr';
+      const userId = (req as any).user?.claims?.sub;
 
       if (userRole !== 'manager' && userRole !== 'admin') {
         return res.status(403).json({ message: "Insufficient permissions" });
@@ -1247,7 +1231,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const validatedData = createUserSchema.parse(req.body);
 
       // Check if email already exists
-      const existingUser = await storage.getUserByEmail(validatedData.email || '');
+      const email = validatedData.email?.toLowerCase().trim();
+      const existingUser = await storage.getUserByEmail(email || '');
       if (existingUser) {
         return res.status(400).json({ message: `Email "${validatedData.email}" is already in use. Please use a different email address.` });
       }
@@ -1275,15 +1260,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const plainPassword = validatedData.password || generatePassword();
       const passwordHash = await bcrypt.hash(plainPassword, 10);
 
+      // Sanitize data - remove fields that are not in the database table
+      const { password: _password, status: _status, ...restOfValidatedData } = validatedData;
+
       const user = await storage.createUser({
-        ...validatedData,
+        ...restOfValidatedData,
+        email, // Use normalized email
         passwordHash,
         firstName: validatedData.fullName.split(' ')[0],
         lastName: validatedData.fullName.split(' ').slice(1).join(' '),
         isActive: validatedData.status === 'active',
         teamName: validatedData.role === 'team_lead' ? validatedData.teamName : null,
         teamLeadId: validatedData.role === 'hr' ? validatedData.teamLeadId : null
-      });
+      } as any);
 
       // Broadcast user creation to managers and admins only
       if (typeof (global as any).broadcastUpdate === 'function') {

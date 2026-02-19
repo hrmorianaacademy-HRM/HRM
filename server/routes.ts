@@ -17,6 +17,7 @@ import path from "path";
 import nodemailer from "nodemailer";
 import { sendEmail } from "./email-service";
 import { format } from "date-fns";
+import crypto from 'crypto';
 
 const upload = multer({
   storage: multer.memoryStorage(),
@@ -1265,6 +1266,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       const user = await storage.createUser({
         ...restOfValidatedData,
+        id: crypto.randomUUID(),
+        username: email,
         email, // Use normalized email
         passwordHash,
         firstName: validatedData.fullName.split(' ')[0],
@@ -1280,7 +1283,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           id: user.id,
           fullName: validatedData.fullName,
           role: user.role,
-          createdBy: req.user.claims.sub
+          createdBy: req.user?.claims?.sub || 'unknown'
         }, {
           roles: ['manager', 'admin'] // Only managers and admins see user creation
         });
@@ -1297,6 +1300,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
     } catch (error: any) {
       console.error("Error creating user:", error);
+      res.status(500).json({
+        message: error.message || "Failed to create user",
+        detail: error.detail || error.hint || undefined
+      });
       // Check for specific database errors
       if (error.code === '23505' && error.detail && error.detail.includes('email')) {
         return res.status(400).json({ message: "Email already exists. Please use a different email address." });

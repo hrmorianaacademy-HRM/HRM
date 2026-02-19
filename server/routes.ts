@@ -898,6 +898,35 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Get recent leads (most recently updated)
+  app.get('/api/leads/recent', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const currentUser = await storage.getUser(userId);
+      const userRole = currentUser?.role || 'hr';
+
+      let filters: any = {
+        page: 1,
+        limit: 10,
+        sortBy: 'createdAt',
+        sortOrder: 'desc'
+      };
+
+      // Role-based filtering for recent activity
+      if (userRole === 'hr') {
+        filters.ownerId = userId;
+      } else if (userRole === 'accounts') {
+        filters.status = 'pending';
+      }
+
+      const result = await storage.searchLeads(filters);
+      res.json(result);
+    } catch (error) {
+      console.error("Error fetching recent leads:", error);
+      res.status(500).json({ message: "Failed to fetch recent leads" });
+    }
+  });
+
 
   // Lead details
   app.get('/api/leads/:id', isAuthenticated, async (req: any, res) => {
@@ -1403,35 +1432,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error deleting user:", error);
       res.status(500).json({ message: "Failed to delete user" });
-    }
-  });
-
-  // Lead management routes
-  app.get('/api/leads/recent', isAuthenticated, async (req: any, res) => {
-    try {
-      const userId = req.user.claims.sub;
-      const currentUser = await storage.getUser(userId);
-      const userRole = currentUser?.role || 'hr';
-
-      let filters: any = {
-        page: 1,
-        limit: 10,
-        sortBy: 'createdAt',
-        sortOrder: 'desc'
-      };
-
-      // Role-based filtering for recent activity
-      if (userRole === 'hr') {
-        filters.ownerId = userId;
-      } else if (userRole === 'accounts') {
-        filters.status = 'pending';
-      }
-
-      const result = await storage.searchLeads(filters);
-      res.json(result);
-    } catch (error) {
-      console.error("Error fetching recent leads:", error);
-      res.status(500).json({ message: "Failed to fetch recent leads" });
     }
   });
 
@@ -4711,16 +4711,7 @@ Please do not reply to this email unless providing absence justification.`;
     }
   });
 
-  // Get recent leads (most recently updated)
-  app.get('/api/leads/recent', isAuthenticated, async (req: any, res) => {
-    try {
-      const leadsResult = await storage.searchLeads({ limit: 10 });
-      res.json(leadsResult.leads || []);
-    } catch (error: any) {
-      console.error('[leads/recent] Error:', error);
-      res.status(500).json({ message: 'Failed to fetch recent leads', error: error.message });
-    }
-  });
+
 
   // Update student mapping (ID, joinedAt)
   app.patch('/api/classes/:classId/students/:leadId/mapping', isAuthenticated, async (req: any, res) => {

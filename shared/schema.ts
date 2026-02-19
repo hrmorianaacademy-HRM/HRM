@@ -72,6 +72,7 @@ export const leads = pgTable("leads", {
   // Accounts workflow fields
   transactionNumber: text("transaction_number"),
   concession: decimal("concession", { precision: 10, scale: 2 }),
+  category: text("category"),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });

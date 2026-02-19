@@ -2808,28 +2808,33 @@ export async function registerRoutes(app: Express): Promise<Server> {
           };
 
           const leadData: any = {
-            name: rowData.name,
-            email: rowData.email,
-            phone: rowData.phone != null ? String(rowData.phone) : null, // Convert to string to handle Excel numbers
-            location: rowData.location,
-            degree: rowData.degree,
-            domain: rowData.domain,
-            sessionDays: parseSessionDays(rowData.session_days),
+            name: rowData.name || getColumnValue(rowData, 'name', 'Name', 'Full Name', 'Fullname'),
+            email: rowData.email || getColumnValue(rowData, 'email', 'Email', 'E-mail'),
+            phone: rowData.phone != null ? String(rowData.phone) : getColumnValue(rowData, 'phone', 'Phone', 'Mobile', 'Contact'),
+            location: rowData.location || getColumnValue(rowData, 'location', 'Location', 'City', 'Address'),
+            degree: rowData.degree || getColumnValue(rowData, 'degree', 'Degree', 'Qualification', 'Education'),
+            domain: rowData.domain || getColumnValue(rowData, 'domain', 'Domain', 'Field', 'Subject'),
+            sessionDays: parseSessionDays(rowData.session_days || getColumnValue(rowData, 'session_days', 'sessionDays', 'Session Days')),
             sourceManagerId: actualUserId,
             status: 'new',
             isActive: true,
             category: uploadCategory
           };
 
-          // Handle dynamic columns - flexible column name matching
-          const yearOfPassing = getColumnValue(rowData, 'year_of_passing', 'yearOfPassing', 'Year of Passing', 'YearOfPassing');
+          // Handle additional dynamic columns explicitly
+          const yearOfPassing = getColumnValue(rowData, 'year_of_passing', 'yearOfPassing', 'Year of Passing', 'YearOfPassing', 'Passing Year');
           if (yearOfPassing) {
             leadData.yearOfPassing = String(yearOfPassing);
           }
 
-          const collegeName = getColumnValue(rowData, 'college_name', 'collegeName', 'College Name', 'CollegeName');
+          const collegeName = getColumnValue(rowData, 'college_name', 'collegeName', 'College Name', 'CollegeName', 'College');
           if (collegeName) {
             leadData.collegeName = String(collegeName);
+          }
+
+          const notes = getColumnValue(rowData, 'notes', 'Notes', 'Comment', 'Comments');
+          if (notes) {
+            leadData.notes = String(notes);
           }
 
           // Always leave imported leads unassigned so they appear in Lead Management

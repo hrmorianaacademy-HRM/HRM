@@ -63,6 +63,7 @@ if (!process.env.DATABASE_URL) {
           registration_amount decimal,
           pending_amount decimal,
           partial_amount decimal,
+          total_amount decimal DEFAULT '7000.00',
           transaction_number text,
           concession decimal,
           category text,

@@ -380,11 +380,13 @@ export class DatabaseStorage implements IStorage {
     if (sanitizedUpdates.notes === '') sanitizedUpdates.notes = null;
     if (sanitizedUpdates.sessionDays === '') sanitizedUpdates.sessionDays = null;
     if (sanitizedUpdates.timing === '') sanitizedUpdates.timing = null;
+    if (sanitizedUpdates.category === '') sanitizedUpdates.category = null;
     // Dynamic fields from bulk import
     if (sanitizedUpdates.yearOfPassing === '') sanitizedUpdates.yearOfPassing = null;
     if (sanitizedUpdates.collegeName === '') sanitizedUpdates.collegeName = null;
     // HR workflow field - registrationAmount is already handled in routes.ts
     if (sanitizedUpdates.registrationAmount === '') sanitizedUpdates.registrationAmount = null;
+    if (sanitizedUpdates.totalAmount === '') sanitizedUpdates.totalAmount = null;
 
     const [lead] = await db
       .update(leads)

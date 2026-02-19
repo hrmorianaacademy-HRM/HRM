@@ -32,7 +32,7 @@ migrations/
 
 # Uploads & Media (if large)
 uploads/
-attached_assets/
+# attached_assets/
 *.mp4
 *.mov
 *.avi

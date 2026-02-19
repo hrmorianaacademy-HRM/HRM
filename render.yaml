@@ -1,0 +1,17 @@
+# Updated: 2026-01-08 - Fixed student enrollment by adding startup migrations
+services:
+  - type: web
+    name: HRM_TEST
+    runtime: node
+    plan: free
+    buildCommand: npm install && npm run build
+    startCommand: npm start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: GOOGLE_GEMINI_API_KEY
+        sync: false  # Set this value manually in Render Dashboard for security
+      - key: SESSION_SECRET
+        sync: false  # Set a strong random secret in Render Dashboard
+      - key: DATABASE_URL
+        sync: false  # Set your Neon PostgreSQL connection string

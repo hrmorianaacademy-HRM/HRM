@@ -1,0 +1,102 @@
+# Dependencies
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Build output
+dist/
+build/
+.out/
+.next/
+.nuxt/
+.cache/
+
+# Environment variables
+.env
+.env.*
+!.env.example
+
+# Logs
+*.log
+api_logs.txt
+DEBUG_LOGS.txt
+
+# Database (local only)
+.pglite/
+*.db
+*.sqlite
+*.db-journal
+migrations/
+
+# Uploads & Media (if large)
+uploads/
+attached_assets/
+*.mp4
+*.mov
+*.avi
+
+# IDE & Editor
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Debugging scripts & dumps
+inspect_transfers.cjs
+inspect_transfers.mjs
+list_all_users.cjs
+check_users.cjs
+dump.cjs
+lead_19_history.cjs
+transfer_debug.txt
+user_list.txt
+lead_19_history.txt
+dump.json
+debug_dump.json
+*.dump
+
+# HLS streaming artifacts
+hls-output/
+*.m3u8
+# Removed global *.ts to avoid ignoring source files
+
+# OS files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Test coverage
+coverage/
+.nyc_output/
+
+# Temporary files
+*.tmp
+*.temp
+.temp/
+
+# Large archives (never commit these)
+*.zip
+*.rar
+*.7z
+*.tar.gz
+
+# Automation & Push scripts
+push_to_github.ps1
+
+# Temporary/Backup Files
+*.backup
+
+# Other debug/test scripts
+check_data.ts
+clear-leads-sql.ts
+clear-leads.ts
+create-test-lead.ts
+debug-accounts-leads.ts
+debug_sql.ts
+dump_db.ts
+put-endpoint.ts
+test-accounts-query.ts
+test.ts
